@@ -1,6 +1,5 @@
-use diesel::table;
 table! {
-    score (id) {
+    scores (id) {
         id -> Integer,
         high_score -> Integer,
         username -> Text,
