@@ -34,7 +34,7 @@ fn list() -> Result<Json<Vec<Score>>, BackendErr> {
     }]))
 }
 
-#[get("/search/<name>")]
+#[get("/user/<name>")]
 fn get_by_username(name: String) -> Result<Json<Vec<Score>>, BackendErr> {
     Ok(Json(vec![Score {
         id: 0,
