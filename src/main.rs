@@ -1,14 +1,22 @@
 #![feature(proc_macro_hygiene, decl_macro)]
+mod database;
+
 #[macro_use]
 extern crate rocket;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate dotenv;
+#[macro_use]
+extern crate serde_derive;
 
 // in v0.5.1-rc Json is part of rocket
 // https://stackoverflow.com/questions/68682054/how-to-return-json-as-a-response-in-rust-rocket-with-auto-field-deserialising
 // but we are still using 0.4.10 for now
 use rocket_contrib::json::Json;
 use serde::{Deserialize, Serialize};
-#[macro_use]
-extern crate serde_derive;
+use crate::database::models::Score;
+
 
 #[derive(Responder, Debug)]
 pub enum BackendErr {
@@ -18,18 +26,12 @@ pub enum BackendErr {
     NotFound(String),
 }
 
-#[derive(Serialize, Clone, Debug)]
-pub struct Score {
-    pub id: i32,
-    pub score: i32,
-    pub username: String,
-}
 
 #[get("/list")]
 fn list() -> Result<Json<Vec<Score>>, BackendErr> {
     Ok(Json(vec![Score {
         id: 0,
-        score: 100000,
+        high_score: 100000,
         username: "BestPlayer".to_string(),
     }]))
 }
@@ -38,7 +40,7 @@ fn list() -> Result<Json<Vec<Score>>, BackendErr> {
 fn get_by_username(name: String) -> Result<Json<Vec<Score>>, BackendErr> {
     Ok(Json(vec![Score {
         id: 0,
-        score: 100000,
+        high_score: 100000,
         username: "BestPlayer".to_string(),
     }]))
 }
