@@ -22,7 +22,7 @@ pub enum BackendErr {
 pub struct Score {
     pub id: i32,
     pub score: i32,
-    pub player: String,
+    pub username: String,
 }
 
 #[get("/list")]
@@ -30,12 +30,21 @@ fn list() -> Result<Json<Vec<Score>>, BackendErr> {
     Ok(Json(vec![Score {
         id: 0,
         score: 100000,
-        player: "BestPlayer".to_string(),
+        username: "BestPlayer".to_string(),
+    }]))
+}
+
+#[get("/search/<name>")]
+fn get_by_username(name: String) -> Result<Json<Vec<Score>>, BackendErr> {
+    Ok(Json(vec![Score {
+        id: 0,
+        score: 100000,
+        username: "BestPlayer".to_string(),
     }]))
 }
 
 fn main() {
     rocket::ignite()
-        .mount("/highscores", routes![list])
+        .mount("/highscores", routes![list, get_by_username])
         .launch();
 }
