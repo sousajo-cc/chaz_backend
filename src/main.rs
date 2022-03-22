@@ -14,6 +14,7 @@ extern crate serde_derive;
 // https://stackoverflow.com/questions/68682054/how-to-return-json-as-a-response-in-rust-rocket-with-auto-field-deserialising
 // but we are still using 0.4.10 for now
 use crate::database::models::score::Score;
+use crate::database::schema::scores::difficulty;
 use database::establish_connection;
 use rocket_contrib::json::Json;
 use serde::{Deserialize, Serialize};
@@ -41,10 +42,25 @@ fn list() -> Result<Json<Vec<Score>>, BackendErr> {
 }
 
 #[get("/user/<name>")]
-fn get_by_username(name: String) -> Result<Json<Vec<Score>>, BackendErr> {
+fn get_username_global_score_history(name: String) -> Result<Json<Vec<Score>>, BackendErr> {
     let connection = establish_connection();
     let scores = Score::find(&connection, name)?;
     Ok(Json(scores))
+}
+
+#[get("/user/<name>/lvl/<level>/difficulty/<diff>")]
+fn get_username_scores(
+    name: String,
+    level: String,
+    diff: String,
+) -> Result<Json<Vec<Score>>, BackendErr> {
+    let connection = establish_connection();
+    let mut filtered = Score::find(&connection, name)?
+        .into_iter()
+        .filter(|score| score.level == level && score.difficulty == diff.to_uppercase())
+        .collect::<Vec<Score>>();
+    filtered.sort_by(|s1, s2| s1.cmp(s2));
+    Ok(Json(filtered))
 }
 
 // TESTS
@@ -55,31 +71,50 @@ pub fn fake_scores_example() -> Result<(), BackendErr> {
             id: 0,
             high_score: 100000,
             username: "th3gr34tw4rr10r".to_string(),
+            difficulty: "EASY".to_string(),
+            level: "1".to_string(),
         },
         Score {
             id: 1,
             high_score: 100000,
             username: "thEBeSTPLAyaaAA".to_string(),
+            difficulty: "EASY".to_string(),
+            level: "1".to_string(),
         },
         Score {
             id: 2,
             high_score: 100000,
             username: "0111111_w".to_string(),
+            difficulty: "HARD".to_string(),
+            level: "1".to_string(),
         },
         Score {
             id: 3,
             high_score: 100000,
             username: "LEEETZOR".to_string(),
+            difficulty: "MEDIUM".to_string(),
+            level: "1".to_string(),
         },
         Score {
             id: 4,
             high_score: 100000,
             username: "n00b".to_string(),
+            difficulty: "ZATOICHI".to_string(),
+            level: "1".to_string(),
         },
         Score {
             id: 5,
             high_score: 100000,
             username: "bh0t".to_string(),
+            difficulty: "EASY".to_string(),
+            level: "1".to_string(),
+        },
+        Score {
+            id: 6,
+            high_score: 100010,
+            username: "thEBeSTPLAyaaAA".to_string(),
+            difficulty: "EASY".to_string(),
+            level: "1".to_string(),
         },
     ];
     Score::insert_batch(&connection, fake_data)?;
@@ -92,7 +127,19 @@ fn insert_batch() -> Result<(), BackendErr> {
 }
 
 fn main() {
-    rocket::ignite()
-        .mount("/highscores", routes![list, get_by_username, insert_batch])
+    let cfg = rocket::config::Config::build(rocket::config::Environment::Development)
+        .address("127.0.0.1")
+        .port(8001)
+        .unwrap();
+    rocket::custom(cfg)
+        .mount(
+            "/highscores",
+            routes![
+                list,
+                get_username_global_score_history,
+                insert_batch,
+                get_username_scores
+            ],
+        )
         .launch();
 }
