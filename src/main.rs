@@ -127,11 +127,26 @@ fn insert_batch() -> Result<(), BackendErr> {
 }
 
 fn main() {
+    use rocket::http::Method;
+    use rocket_cors::{AllowedOrigins, CorsOptions};
+
+    let cors = CorsOptions::default()
+        .allowed_origins(AllowedOrigins::all())
+        .allowed_methods(
+            vec![Method::Get, Method::Post, Method::Patch]
+                .into_iter()
+                .map(From::from)
+                .collect(),
+        )
+        .allow_credentials(true)
+        .to_cors().unwrap();
+
     let cfg = rocket::config::Config::build(rocket::config::Environment::Development)
         .address("127.0.0.1")
         .port(8001)
         .unwrap();
     rocket::custom(cfg)
+        .attach(cors)
         .mount(
             "/highscores",
             routes![
