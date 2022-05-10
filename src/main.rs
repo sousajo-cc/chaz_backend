@@ -63,54 +63,63 @@ fn get_username_scores(
     Ok(Json(filtered))
 }
 
+//TODO: needs to be secured, otherwise anyone will be able to post any score
+#[post("/", format = "application/json", data = "<score>")]
+fn post_score(
+    score: Json<Score>,
+) -> Result<Json<usize>, BackendErr> {
+    let result = score.insert(&establish_connection())?;
+    Ok(Json(result))
+}
+
 // TESTS
 pub fn fake_scores_example() -> Result<(), BackendErr> {
     let connection = establish_connection();
     let fake_data = vec![
         Score {
-            id: 0,
+            id: None,
             high_score: 100000,
             username: "th3gr34tw4rr10r".to_string(),
             difficulty: "EASY".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 1,
+            id: None,
             high_score: 100000,
             username: "thEBeSTPLAyaaAA".to_string(),
             difficulty: "EASY".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 2,
+            id: None,
             high_score: 100000,
             username: "0111111_w".to_string(),
             difficulty: "HARD".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 3,
+            id: None,
             high_score: 100000,
             username: "LEEETZOR".to_string(),
             difficulty: "MEDIUM".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 4,
+            id: None,
             high_score: 100000,
             username: "n00b".to_string(),
             difficulty: "ZATOICHI".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 5,
+            id: None,
             high_score: 100000,
             username: "bh0t".to_string(),
             difficulty: "EASY".to_string(),
             level: "1".to_string(),
         },
         Score {
-            id: 6,
+            id: None,
             high_score: 100010,
             username: "thEBeSTPLAyaaAA".to_string(),
             difficulty: "EASY".to_string(),
@@ -153,7 +162,8 @@ fn main() {
                 list,
                 get_username_global_score_history,
                 insert_batch,
-                get_username_scores
+                get_username_scores,
+                post_score,
             ],
         )
         .launch();
