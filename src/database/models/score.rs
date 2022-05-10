@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use diesel::RunQueryDsl;
 use std::cmp::Ordering;
 
-#[derive(Queryable, Serialize, Identifiable, Insertable, Clone, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Identifiable, Insertable, Clone, Debug)]
 #[table_name = "scores"]
 #[primary_key(id)]
 #[derive(Eq)]
@@ -16,6 +16,12 @@ pub struct Score {
 }
 
 impl Score {
+    pub fn insert(&self, conn: &SqliteConnection) -> QueryResult<usize> {
+        diesel::insert_into(scores_table)
+            .values(self)
+            .execute(conn)
+    }
+
     pub fn insert_batch(conn: &SqliteConnection, values: Vec<Score>) -> QueryResult<usize> {
         diesel::insert_into(scores_table)
             .values(values)

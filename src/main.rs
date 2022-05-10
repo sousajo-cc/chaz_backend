@@ -63,6 +63,15 @@ fn get_username_scores(
     Ok(Json(filtered))
 }
 
+//TODO: needs to be secured, otherwise anyone will be able to post any score
+#[post("/", format = "application/json", data = "<score>")]
+fn post_score(
+    score: Json<Score>,
+) -> Result<Json<usize>, BackendErr> {
+    let result = score.insert(&establish_connection())?;
+    Ok(Json(result))
+}
+
 // TESTS
 pub fn fake_scores_example() -> Result<(), BackendErr> {
     let connection = establish_connection();
@@ -153,7 +162,8 @@ fn main() {
                 list,
                 get_username_global_score_history,
                 insert_batch,
-                get_username_scores
+                get_username_scores,
+                post_score,
             ],
         )
         .launch();
