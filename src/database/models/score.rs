@@ -8,7 +8,8 @@ use std::cmp::Ordering;
 #[primary_key(id)]
 #[derive(Eq)]
 pub struct Score {
-    pub id: i32,
+    #[diesel(deserialize_as = "i32")]
+    pub id: Option<i32>,
     pub high_score: i32,
     pub username: String,
     pub difficulty: String,
